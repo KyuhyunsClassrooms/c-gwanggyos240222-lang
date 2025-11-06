@@ -1,36 +1,79 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
 
-/*
-    1. [설계]에서 정의한 변수, 배열, (필요하면) 구조체를 여기에 선언하세요.
-    
-    예시 - 배열 사용:
-    char names[100][20];
-    int scores[100];
-    int count = 0;
-    
-    예시 - 구조체 사용 (선택):
-    struct Student {
-        char name[20];
-        int score;
-    };
-    struct Student students[100];
-*/
+#define MAX_LIVES 6
 
+char *words[] = {"apple", "banana", "orange", "grape", "melon", "peach"};
 
-/*
-    2. [알고리즘]에서 설계한 핵심 기능 함수들을 여기에 선언하세요.
-*/
+struct Hangman {
+    char *word;
+    char guessed[27];
+    int lives;
+};
 
+void display_word(char *word, char *guessed) {
+    for (int i = 0; word[i] != '\0'; i++) {
+        if (strchr(guessed, word[i]))
+            printf("%c ", word[i]);
+        else
+            printf("_ ");
+    }
+    printf("\n");
+}
 
 int main() {
-    
-    printf("--- C언어 미니 프로젝트 시작! ---\n");
+    srand(time(0));
 
-    /*
-        3. [알고리즘]에서 설계한 main 함수의 흐름을
-           여기에 C언어로 자유롭게 구현하세요.
-    */
-    
-    
+    struct Hangman game;
+    game.word = words[rand() % 6];
+    game.lives = MAX_LIVES;
+    game.guessed[0] = '\0';
+
+    printf("=== 행맨 게임 ===\n");
+
+    while (game.lives > 0) {
+        printf("\n단어: ");
+        display_word(game.word, game.guessed);
+        printf("남은 목숨: %d\n", game.lives);
+
+        char guess;
+        printf("글자를 입력하세요: ");
+        scanf(" %c", &guess);
+        guess = tolower(guess);
+
+        if (strchr(game.guessed, guess)) {
+            printf("이미 입력한 글자입니다.\n");
+            continue;
+        }
+
+        int len = strlen(game.guessed);
+        game.guessed[len] = guess;
+        game.guessed[len + 1] = '\0';
+
+        if (strchr(game.word, guess)) {
+            printf("정답입니다!\n");
+        } else {
+            game.lives--;
+            printf("틀렸습니다.\n");
+        }
+
+        int correct = 1;
+        for (int i = 0; game.word[i] != '\0'; i++) {
+            if (!strchr(game.guessed, game.word[i])) {
+                correct = 0;
+                break;
+            }
+        }
+
+        if (correct) {
+            printf("\n축하합니다! 단어 '%s'를 맞추셨습니다!\n", game.word);
+            return 0;
+        }
+    }
+
+    printf("\n아쉽네요... 정답은 '%s'였습니다.\n", game.word);
     return 0;
 }
